@@ -60,7 +60,7 @@ async fn main() -> anyhow::Result<()> {
     if let Some(slot) = command.value_of("slot") {
         let slot = U256::from_str_radix(slot, 10).expect("Slot is incorrect");
         let user_addr = command
-            .value_of("USER_ADDRESS")
+            .value_of("TOKEN_ADDRESS")
             .expect("You need to provide a user address")
             .parse::<Address>()
             .expect("Address is not valid");
@@ -148,7 +148,7 @@ async fn find_storage_slot<M: Middleware + 'static>(provider: Arc<M>, limit: u64
     println!("{:?} holds {} {}", holder_addr, holder_balance, token_symbol);
 
     let pb = ProgressBar::new(limit as u64);
-    pb.set_style(ProgressStyle::default_bar().template("{spinner:.green} {msg} {pos}/{len}"));
+    pb.set_style(ProgressStyle::default_bar().template("{spinner:.green} {msg}"));
     pb.set_message(format!("Searching for storage slot of 'balanceOf' mapping..."));
 
     let mut bytes_i = [0; 32];
