@@ -1,19 +1,20 @@
 # balanceof-slot-finder
 
 Small CLI tool to find the storage slot of the *'mapping (address => uint256) balanceOf'* variable  in a Solidity or Vyper smart contract. It can also compute the storage slot of 'balanceOf(<USER_ADDRESS>)' providing a user address.
+Check for --help to see the full list of options. 
 
 ## Usage
 
 ```bash
 # command 1)
-#compute storage slot of balanceOf(0xdBdb4d16EdA451D0503b854CF79D55697F90c8DF) 
+#compute storage slot of balanceOf(0xdBdb4d16EdA451D0503b854CF79D55697F90c8DF). add --vyper if the contract is written in Vyper
 #if balanceOf mapping variable is the slot 1 of the contract's storage
 ./balanceof-slot-finder --slot 1 0xdBdb4d16EdA451D0503b854CF79D55697F90c8DF
 
 Storage slot for 'balanceOf(0xdbdb4d16eda451d0503b854cf79d55697f90c8df)' = 69554892544234123856217080638365649477632321735092257560885072347495956232176
 
 #command 2)
-#find the storage slot of the balanceOf mapping variable for the provided ERC20 contract
+#find the storage slot of the balanceOf mapping variable for the provided ERC20 contract. 
 ./balanceof-slot-finder --rpc https://eth-mainnet.alchemyapi.io/v2/<YOUR_KEY> 0xdBdb4d16EdA451D0503b854CF79D55697F90c8DF
 
 0x00000000003b3cc22af3ae1eac0440bcee416b40 holds 16895417474608 ALCX # used to check if balance matches the storage slot value
