@@ -38,6 +38,7 @@ async fn main() -> anyhow::Result<()> {
         .arg(arg!(is_vyper: --vyper).required(false).help("Compute storage slot of <USER_ADDRESS> for a Vyper contract. Default = Solidity"))
         .arg(arg!(<TOKEN_ADDRESS>).required(false))
         .arg(arg!(<USER_ADDRESS>).required(false))
+        .arg(arg!(holder: --holder <HOLDER_ADDRESS>).required(false).help("Address of a token holder. The program will match balances without searching for a token holder"))
         .get_matches();
 
     let mut rpc_addr = match command.value_of("rpc") {
@@ -73,8 +74,20 @@ async fn main() -> anyhow::Result<()> {
             .expect("You need to provide a token address")
             .parse::<Address>()
             .expect("Address is not valid");
-
-        if let Some((slot, is_vyper)) = find_storage_slot(Arc::clone(&provider), limit, token_addr).await? {
+        let token = ERC20Token::new(token_addr, Arc::clone(&provider));
+        let token_symbol = match token.symbol().call().await {
+            Ok(symbol) => symbol,
+            Err(_) => String::from("UnknownToken"),
+        };
+        let (holder_addr, holder_balance) = match command.value_of("holder") {
+            Some(holder_addr) => { 
+                let holder_addr: Address = holder_addr.parse().expect("Address is not valid");
+                (holder_addr, token.balance_of(holder_addr).call().await?)
+            },
+            None => find_token_holder(Arc::clone(&provider), &token).await?
+        };
+        println!("{:?} holds {} {}", holder_addr, holder_balance, token_symbol);
+        if let Some((slot, is_vyper)) = find_storage_slot(Arc::clone(&provider), limit, token_addr, holder_addr, holder_balance).await? {
             if is_vyper {
                 println!("Storage slot of 'balanceOf' Vyper mapping found: {}", slot);
             } else {
@@ -94,8 +107,6 @@ async fn main() -> anyhow::Result<()> {
     
     Ok(())
 }
-
-
 
 async fn find_token_holder<M: Middleware + 'static>(provider: Arc<M>, token: &ERC20Token<M>) -> anyhow::Result<(Address, U256)> {
     let pb = ProgressBar::new_spinner();
@@ -137,16 +148,13 @@ fn get_storage_slot_for_addr(addr: Address, slot: U256, is_vyper: bool) -> U256 
     //println!("balanceOf({:?}) storage slot is: {:?}", addr, slot);
 } 
 
-async fn find_storage_slot<M: Middleware + 'static>(provider: Arc<M>, limit: u64, token_addr: Address) -> anyhow::Result<Option<(U256, bool)>> {
-    let token = ERC20Token::new(token_addr, Arc::clone(&provider));
-    let (holder_addr, holder_balance) = find_token_holder(Arc::clone(&provider), &token).await?;
-
-    let token_symbol = match token.symbol().call().await {
-        Ok(symbol) => symbol,
-        Err(_) => String::from("UnknownToken"),
-    };
-    println!("{:?} holds {} {}", holder_addr, holder_balance, token_symbol);
-
+async fn find_storage_slot<M: Middleware + 'static>(
+    provider: Arc<M>, 
+    limit: u64, 
+    token_addr: Address, 
+    holder_addr: Address, 
+    holder_balance: U256
+) -> anyhow::Result<Option<(U256, bool)>> {
     let pb = ProgressBar::new(limit as u64);
     pb.set_style(ProgressStyle::default_bar().template("{spinner:.green} {msg}"));
     pb.set_message(format!("Searching for storage slot of 'balanceOf' mapping..."));
