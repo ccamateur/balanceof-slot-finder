@@ -9,6 +9,10 @@ edition = "2021"
 ethers = { git = "https://github.com/gakonst/ethers-rs"}
 tokio = {version = "1.11.0", features = ["macros"] }
 
+#html - etherscan
+reqwest = "0.11.9"
+scraper = "0.12.0"
+
 #cli
 clap = "3.0.7"
 
