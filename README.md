@@ -4,6 +4,7 @@ Small CLI tool to find the storage slot of the *'mapping (address => uint256) ba
 
 By default, RPC address is *http://localhost:8445*. <br>
 Add your provider address with **--rpc**. 
+
 **--bentobox** will calculate *'balanceOf[<TOKEN_ADDRESS>][<USER_ADDRESS>]'*. 
 
 Check for **--help** to see the full list of options. 
