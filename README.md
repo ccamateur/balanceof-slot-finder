@@ -2,7 +2,7 @@
 
 Small CLI tool to find the storage slot of the *'mapping (address => uint256) balanceOf'* variable  in a Solidity or Vyper smart contract. It can also compute the storage slot of *'balanceOf[<USER_ADDRESS>]'* providing a user address.
 
-By default, RPC address is *http://localhost:8445*. <br>
+By default, RPC address is *http://localhost:8545*. <br>
 Add your provider address with **--rpc**. 
 
 The option **--bentobox** will calculate *'balanceOf[<TOKEN_ADDRESS>][<USER_ADDRESS>]'* for the BentoBox/DegenBox smart contract. 
